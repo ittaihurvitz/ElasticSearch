@@ -32,7 +32,17 @@ def createJson(bubbleName,user):
 def sendToElasticSearch(json_data):
     es = Elasticsearch([{'host': 'localhost', 'port': 9200}])
     es.index(index='test1_indx', doc_type='type1', body=json.loads(json_data))
+    #call the seach just as example
+    searchExample(es)
 
+# searchExample(es)
+def searchExample(es):
+    es.indices.refresh(index="test1_indx")
+    res = es.search(index="test1_indx", body={"query": {"match_all": {}}, "size": 2000})
+    # show the results
+    print("Got %d Hits:" % res['hits']['total'])
+    for hit in res['hits']['hits']:
+        print("%(first_name)s %(last_name)s: %(created)s" % hit["_source"])
 
 # Function main - Get args and call other functions
 if __name__ == "__main__":

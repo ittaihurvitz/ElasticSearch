@@ -1,2 +1,2 @@
-python sendJsonToES.py "from python 6" "ffff" ""
+python sendJsonToES.py "from pytho8" "xxxx" ""
 pause
