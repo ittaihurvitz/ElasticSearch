@@ -38,11 +38,18 @@ def sendToElasticSearch(json_data):
 # searchExample(es)
 def searchExample(es):
     es.indices.refresh(index="test1_indx")
-    res = es.search(index="test1_indx", body={"query": {"match_all": {}}, "size": 2000})
+    body1 = {"query": {"query_string" : {"fields" : ["last_name", "first_name"], "query" : "yyyxxxx OR aaaaa"}}, "size": 2000}
+    res = es.search(index="test1_indx", body=body1)
+    #res = es.search(index="test1_indx", body={"query": {"match_all": {}}, "size": 2000})
     # show the results
     print("Got %d Hits:" % res['hits']['total'])
     for hit in res['hits']['hits']:
         print("%(first_name)s %(last_name)s: %(created)s" % hit["_source"])
+
+    # print with line numbers
+    for num, name in enumerate(res['hits']['hits'], start=1):
+        #print("{} - {}".format(num,name))
+        print("{} - id = {} - first name = {}".format(num,name['_id'], name['_source']['first_name']))
 
 # Function main - Get args and call other functions
 if __name__ == "__main__":
