@@ -63,15 +63,29 @@ es = Elasticsearch([{'host': 'localhost', 'port': 9200}])
 #print es.search(index="sw", body={"query": {"match": {'gender':'male'}}})
 #print es.search(index="sw", body={"query": {"match": {'name':'Skywalker'}}})
 
-myJson = """
-{
-  "strange": "1234",
-  "first_name": "test1",
-  "last_name": "testing1",
-  "created": "2017-10-09T13:50:51.644000Z",
-  "edited": "2017-11-20T21:17:56.891000Z"
-}
-"""
-es.index(index='test1_indx', doc_type='type1', body=json.loads(myJson))
+##
+##myJson = """
+##{
+##  "strange": "1234",
+##  "first_name": "test1",
+##  "last_name": "testing1",
+##  "created": "2017-10-09T13:50:51.644000Z",
+##  "edited": "2017-11-20T21:17:56.891000Z"
+##}
+##"""
+##es.index(index='test1_indx', doc_type='type1', body=json.loads(myJson))
+##
+##print es.search(index="test1_indx", body={"query": {"match": {'first_name':'test2'}}})
 
-print es.search(index="test1_indx", body={"query": {"match": {'first_name':'test2'}}})
+##myJson = """
+##{
+##  "bubble_name": "Bubble dev 3"
+##}
+##"""
+##
+##es.index(index='bubbles_list', doc_type='type1', id='EXivf2UB__yUO83K572i', body=json.loads(myJson))
+
+es.delete(index='bubbles_list', doc_type='type1', id='EXivf2UB__yUO83K572i')
+
+
+
