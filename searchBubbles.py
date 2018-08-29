@@ -25,6 +25,57 @@ def searchBubbles():
 		}
     """
 
+    # Looks like I need to use Filter Aggregation -
+    #     https://www.elastic.co/guide/en/elasticsearch/reference/current/search-aggregations-bucket-filter-aggregation.html
+
+    json_body2 = """
+		{
+		     "aggs": {
+		      "bubble_name": {
+		        "terms": {
+		          "field": "bubble_name",
+		          "size": 200
+		        }
+		      },
+		      "bubble_count": {
+		          "cardinality": {
+		            "field": "bubble_name"
+		          }
+		      }
+		    },
+		    "size": 0
+		}
+    """
+
+    json_body = """
+		{
+		    "query": {
+		    	"match_all": {}
+			},
+	    	"aggs": {
+	    		"bubble_name": {
+	        		"terms": {
+	        			"field": "bubble_name",
+	        			"size": 200
+	        		}
+	    		},
+	    		"bubble_count": {
+	        		"cardinality": {
+	            		"field": "bubble_name"
+	        		}
+	    		}
+	    	},
+			"size": 100,
+			"sort": [
+			    {
+			    	"created": {
+			        	"order": "desc"
+			    	}
+			    }
+			]
+		}
+    """
+
     #print json_body
     res = es.search(index="bubbles_list", body=json_body)
     #res = es.search(index="bubbles_list", body={"query": {"match_all": {}}, "size": 2000})
@@ -39,6 +90,9 @@ def searchBubbles():
         #print("{} - {}".format(num,name))
         print("{} - id = {} - bubble name = {}".format(num,name['_id'], name['_source']['bubble_name']))
 
+    print res
+
+    
 # Function main - Get args and call other functions
 if __name__ == "__main__":
     searchBubbles()
