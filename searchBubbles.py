@@ -1,71 +1,35 @@
 #!/usr/bin/env python
 import json
-import sys
-from datetime import datetime
 from elasticsearch import Elasticsearch
 
 
 # searchBubbles()
 def searchBubbles():
+    # Connect to the server
     es = Elasticsearch([{'host': 'localhost', 'port': 9200}])
 
-    json_body = """
-		{
-		  "query": {
-		    "match_all": {}
-		  },
-		  "size": 1,
-		  "sort": [
-		    {
-		      "created": {
-		        "order": "desc"
-		      }
-		    }
-		  ]
-		}
-    """
-
-    # Looks like I need to use Filter Aggregation -
-    #     https://www.elastic.co/guide/en/elasticsearch/reference/current/search-aggregations-bucket-filter-aggregation.html
-
-    json_body2 = """
-		{
-		     "aggs": {
-		      "bubble_name": {
-		        "terms": {
-		          "field": "bubble_name",
-		          "size": 200
-		        }
-		      },
-		      "bubble_count": {
-		          "cardinality": {
-		            "field": "bubble_name"
-		          }
-		      }
-		    },
-		    "size": 0
-		}
-    """
-
+    # Define the query and aggregations
     json_body = """
 		{
 		    "query": {
 		    	"match_all": {}
 			},
 	    	"aggs": {
-	    		"bubble_name": {
+	    		"bubble_run_by": {
 	        		"terms": {
-	        			"field": "bubble_name",
-	        			"size": 200
-	        		}
-	    		},
-	    		"bubble_count": {
-	        		"cardinality": {
-	            		"field": "bubble_name"
+	        			"field": "run_by",
+	        			"size": 10
+	        		},
+	        		"aggs": {
+			    		"top_record_agg": {
+			        		"top_hits": {
+			            		"size": 1
+			        		}
+			    		}	        		
 	        		}
 	    		}
 	    	},
-			"size": 100,
+			"size": 1,
 			"sort": [
 			    {
 			    	"created": {
@@ -76,23 +40,23 @@ def searchBubbles():
 		}
     """
 
-    #print json_body
+    # Run the query
     res = es.search(index="bubbles_list", body=json_body)
+
+    # for debugging can run theis:
     #res = es.search(index="bubbles_list", body={"query": {"match_all": {}}, "size": 2000})
 
-    # print the results
-    print("Got %d Hits:" % res['hits']['total'])
-    for hit in res['hits']['hits']:
-        print("%(bubble_name)s %(created)s" % hit["_source"])
+    # Print the results (for debug)
+    print("Got %d Hits. But the report is:" % res['hits']['total'])
+    for bucket in res['aggregations']['bubble_run_by']['buckets']:
+    	for hit in bucket['top_record_agg']['hits']['hits']:
+    		#print hit
+    		print("Bubble name: %(bubble_name)s  Ran by: %(run_by)s  Version: %(vs_id)s" % hit["_source"])
+    	
+	# Save the results (for debug)
+	with open('data.json', 'w') as outfile:
+	    json.dump(res, outfile)
 
-    # print with line numbers
-    for num, name in enumerate(res['hits']['hits'], start=1):
-        #print("{} - {}".format(num,name))
-        print("{} - id = {} - bubble name = {}".format(num,name['_id'], name['_source']['bubble_name']))
-
-    print res
-
-    
 # Function main - Get args and call other functions
 if __name__ == "__main__":
     searchBubbles()
