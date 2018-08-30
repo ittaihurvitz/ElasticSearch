@@ -17,8 +17,7 @@ def searchBubbles():
 	    	"aggs": {
 	    		"bubble_run_by": {
 	        		"terms": {
-	        			"field": "run_by",
-	        			"size": 10
+	        			"field": "run_by"
 	        		},
 	        		"aggs": {
 			    		"top_record_agg": {
@@ -35,8 +34,7 @@ def searchBubbles():
 			    		}	        		
 	        		}
 	    		}
-	    	},
-			"size": 1
+	    	}
 		}
     """
 
