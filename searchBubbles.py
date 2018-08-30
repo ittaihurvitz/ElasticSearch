@@ -23,20 +23,20 @@ def searchBubbles():
 	        		"aggs": {
 			    		"top_record_agg": {
 			        		"top_hits": {
-			            		"size": 1
+			            		"size": 1,
+								"sort": [
+								    {
+								    	"created": {
+								        	"order": "desc"
+								    	}
+								    }
+								]
 			        		}
 			    		}	        		
 	        		}
 	    		}
 	    	},
-			"size": 1,
-			"sort": [
-			    {
-			    	"created": {
-			        	"order": "desc"
-			    	}
-			    }
-			]
+			"size": 1
 		}
     """
 
