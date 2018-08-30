@@ -17,7 +17,8 @@ def searchBubbles():
 	    	"aggs": {
 	    		"bubble_run_by": {
 	        		"terms": {
-	        			"field": "run_by"
+	        			"field": "bubble_name.keyword",
+	        			"size": 1000
 	        		},
 	        		"aggs": {
 			    		"top_record_agg": {
