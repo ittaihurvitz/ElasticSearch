@@ -15,6 +15,9 @@ from elasticsearch import Elasticsearch
 # =====> Decided - will not update existing records. Instead the result will be aggregated by 
 #        the bubble name and only the most latest record will be shown. (sort by creation date).
 #        So can use automatic id in ElasticSearch.
+# =====> Update: Decided to use two models - 
+#			1. Keep all data with automatic index. This data will be used in the future. (Because Kibana doesn't support top_hits aggregation).
+#			2. Keep the data that we want to show in another index. Here the key will be the bubble name.
 # run by
 # deploy version
 # deploy build #
@@ -29,7 +32,7 @@ def createJson(bubbleName,user,vs_id):
     data['deploy_version'] = "1.1"
     data['deploy_build'] = "2222"
     data['created'] = str(datetime.utcnow().isoformat())
-    data['machines'] = str([{'name': 'DC', 'ext_ip': '127.0.0.1', 'int_ip': '1.0.0.1'},{'name': 'app', 'ext_ip': '127.0.0.2', 'int_ip': '1.0.0.2'},{'name': 'DB', 'ext_ip': '127.0.0.3', 'int_ip': '1.0.0.3'}])
+    data['machines'] = str("DC:    ext_ip = 127.0.0.1,  int_ip= 1.0.0.1\r\nApp:  ext_ip= 127.0.0.2,  int_ip= 1.0.0.2\r\nDB:    ext_ip= 127.0.0.3,  int_ip='1.0.0.3")
     print data
     json_data = json.dumps(data)
     print "json_data = " + json_data
@@ -38,10 +41,13 @@ def createJson(bubbleName,user,vs_id):
 
 
 # sendToElasticSearch
-def sendToElasticSearch(json_data):
+def sendToElasticSearch(json_data, bubbleName):
     es = Elasticsearch([{'host': 'localhost', 'port': 9200}])
+    # First send is for collecting all data. Use automatic index.
     es.index(index='bubbles_list', doc_type='type1', body=json.loads(json_data))
-    #es.index(index='bubbles_list', doc_type='type1', id=vs_id, body=json.loads(json_data))
+    # Secnd send is for currect report. The key is the bubble name so will update existing records.
+    es.index(index='bubbles_current_report', doc_type='type1', id=bubbleName, body=json.loads(json_data))
+
     #call the seach just as example
     #searchExample(es)
 
@@ -68,4 +74,4 @@ if __name__ == "__main__":
     user = sys.argv[2]
     vs_id = sys.argv[3]
     json_data = createJson(bubbleName,user,vs_id)
-    sendToElasticSearch(json_data)
+    sendToElasticSearch(json_data,bubbleName)
